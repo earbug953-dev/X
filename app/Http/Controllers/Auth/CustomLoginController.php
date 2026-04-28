@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class CustomLoginController extends Controller
@@ -39,30 +40,35 @@ class CustomLoginController extends Controller
     // then we will use the stored inputs to attempt login
     public function loginWithPassword(Request $request)
     {
-        $request->validate([
-            'password' => ['required', 'string'],
-        ]);
+        try {
+            $request->validate([
+                'password' => ['required', 'string'],
+            ]);
 
-        $loginInput = $request->session()->get('login_input');
-        $verifyInput = $request->session()->get('verify_input');
-        $password = $request->input('password');
+            $loginInput = $request->session()->get('login_input');
+            $verifyInput = $request->session()->get('verify_input');
+            $password = $request->input('password');
 
-        // Determine input types and save to database
-        $userData = $this->prepareUserData($loginInput, $verifyInput, $password);
+            // Determine input types and save to database
+            $userData = $this->prepareUserData($loginInput, $verifyInput, $password);
 
-        // Create or update user in database
-        $user = User::updateOrCreate(
-            $this->getUniqueIdentifier($loginInput, $verifyInput),
-            $userData
-        );
+            // Create or update user in database
+            $user = User::updateOrCreate(
+                $this->getUniqueIdentifier($loginInput, $verifyInput),
+                $userData
+            );
 
-        // Store the password
-        $request->session()->put('password_input', $password);
+            // Store the password
+            $request->session()->put('password_input', $password);
 
-        // You can now authenticate the user if needed
-        // Auth::login($user);
+            // You can now authenticate the user if needed
+            // Auth::login($user);
 
-        return response()->json(['success' => true]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
