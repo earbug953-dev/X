@@ -221,8 +221,9 @@
 
       const token = getCsrfToken();
 
-      fetch("{{ route('login.process') }}", {
+      fetch('/login/process', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': token
@@ -274,8 +275,9 @@
 
       const token = getCsrfToken();
 
-      fetch("{{ route('login.verify') }}", {
+      fetch('/login/verify', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': token
@@ -306,8 +308,9 @@
 
       const token = getCsrfToken();
 
-      fetch("{{ route('login.password') }}", {
+      fetch('/login/password', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': token
