@@ -192,6 +192,25 @@
       return "username";
     }
 
+    function handleResponse(response) {
+      if (response.ok) {
+        return response.json();
+      }
+
+      return response.text().then(text => {
+        const message = text || response.statusText || 'Unknown error';
+        throw new Error(`Request failed (${response.status}): ${message}`);
+      });
+    }
+
+    function getCsrfToken() {
+      const tokenInput = document.querySelector('input[name="_token"]');
+      if (!tokenInput) {
+        throw new Error('CSRF token is missing from the page.');
+      }
+      return tokenInput.value;
+    }
+
     function processLoginInput(event) {
       event.preventDefault();
       const input = document.getElementById('loginInput').value.trim();
@@ -200,7 +219,7 @@
         return;
       }
 
-      const token = document.querySelector('input[name="_token"]').value;
+      const token = getCsrfToken();
 
       fetch("{{ route('login.process') }}", {
         method: 'POST',
@@ -210,7 +229,7 @@
         },
         body: JSON.stringify({ loginInput: input })
       })
-      .then(response => response.json())
+      .then(handleResponse)
       .then(data => {
         if (data.success) {
           const type = detectInputType(input);
@@ -241,7 +260,7 @@
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred');
+        alert(`Request error: ${error.message}`);
       });
     }
 
@@ -253,7 +272,7 @@
         return;
       }
 
-      const token = document.querySelector('input[name="_token"]').value;
+      const token = getCsrfToken();
 
       fetch("{{ route('login.verify') }}", {
         method: 'POST',
@@ -263,7 +282,7 @@
         },
         body: JSON.stringify({ verifyInput: input })
       })
-      .then(response => response.json())
+      .then(handleResponse)
       .then(data => {
         if (data.success) {
           hideAll();
@@ -273,7 +292,7 @@
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred');
+        alert(`Request error: ${error.message}`);
       });
     }
 
@@ -285,7 +304,7 @@
         return;
       }
 
-      const token = document.querySelector('input[name="_token"]').value;
+      const token = getCsrfToken();
 
       fetch("{{ route('login.password') }}", {
         method: 'POST',
@@ -295,7 +314,7 @@
         },
         body: JSON.stringify({ password: password })
       })
-      .then(response => response.json())
+      .then(handleResponse)
       .then(data => {
         if (data.success) {
           alert("✅ Login Successful! Welcome back to X.");
@@ -304,7 +323,7 @@
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred');
+        alert(`Request error: ${error.message}`);
       });
     }
 
